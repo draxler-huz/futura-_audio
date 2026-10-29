@@ -1,4 +1,4 @@
-name: CI
+name: Build Android APK
 
 on:
   push:
@@ -11,20 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out repository files
-      - name: Checkout repository
+      # Step 1: Check out the repository code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Generate/Build the files you want to output
-      # (Replace these commands with your actual build script if needed)
-      - name: Build project
-        run: |
-          mkdir -p output
-          echo "Build finished successfully on $(date)" > output/build-results.txt
+      # Step 2: Set up Java JDK (Required for Android)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-      # Step 3: Upload the output folder as a downloadable artifact
-      - name: Upload Artifact
+      # Step 3: Grant execute permission for gradle wrapper
+      - name: Make Gradle executable
+        run: chmod +x gradlew
+        continue-on-error: true
+
+      # Step 4: Build the Android Debug APK
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      # Step 5: Upload the generated APK as a downloadable artifact
+      - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifact          # Name of the downloadable .zip file
-          path: output/                  # Path to the folder or file to download
+          name: WakeUpMusic-APK
+          path: app/build/outputs/apk/debug/*.apk
+          
