@@ -5,8 +5,19 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Oboe is provided as a prefab package by the Gradle dependency com.google.oboe:oboe.
-find_package(oboe REQUIRED CONFIG)
+# 16 KB page alignment for every shared library we link, including the ones built below.
+# Prebuilt Oboe binaries from the Maven AAR are 4 KB aligned, which is why Oboe is built from source here.
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+
+# Oboe is built from source at a pinned release tag.
+include(FetchContent)
+FetchContent_Declare(
+    oboe
+    GIT_REPOSITORY https://github.com/google/oboe.git
+    GIT_TAG 1.8.0
+    GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(oboe)
 
 add_library(futura_audio SHARED
     audio_engine.cpp
@@ -17,12 +28,8 @@ add_library(futura_audio SHARED
 
 target_compile_options(futura_audio PRIVATE -Wall -Wextra)
 
-# 16 KB page alignment for Android 15+ devices. NDK r28 already defaults to this;
-# the flag makes it explicit so ci/guards/alignment_guard.sh always passes.
-target_link_options(futura_audio PRIVATE -Wl,-z,max-page-size=16384)
-
 target_link_libraries(futura_audio PRIVATE
-    oboe::oboe
+    oboe
     mediandk
     android
     log)

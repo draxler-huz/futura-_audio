@@ -24,8 +24,8 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++17"
-                // Oboe's prefab libraries are built against the shared C++ runtime.
-                arguments += "-DANDROID_STL=c++_shared"
+                // Static C++ runtime: no libc++_shared.so in the APK, so nothing unaligned is packaged.
+                arguments += "-DANDROID_STL=c++_static"
             }
         }
     }
@@ -50,10 +50,6 @@ android {
         }
     }
 
-    buildFeatures {
-        prefab = true
-    }
-
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
@@ -68,9 +64,4 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-}
-
-dependencies {
-    // Low-latency native audio output (AAudio with OpenSL ES fallback), shipped as a prefab AAR.
-    implementation("com.google.oboe:oboe:1.8.0")
 }
