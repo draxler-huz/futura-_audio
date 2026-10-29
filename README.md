@@ -22,3 +22,12 @@
 - Does not implement the fade-in, pitch change, sync, or interval features from the 40 problems.
 - On Android 14+, the full-screen intent permission may need to be granted in Settings.
 - Play Store approval depends on the app being an alarm or timer as its core function.
+
+## CI (GitHub Actions)
+- `.github/workflows/build.yml` builds a release APK and then runs the guards in `ci/guards/`.
+- Signing secrets (optional; without them the APK is built unsigned): `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
+- Guards:
+  - `network_guard.sh`: no INTERNET permission, no network APIs in source.
+  - `permission_guard.sh`: merged manifest permissions must be listed in `ci/guards/allowed_permissions.txt`. Add a line there when you add a permission.
+  - `telemetry_guard.sh`: no analytics or crash-reporting libraries in the release classpath.
+  - `alignment_guard.sh`: native libraries must be 16 KB aligned. Passes if the APK has none; set `REQUIRE_NATIVE=1` to require them.
