@@ -20,7 +20,7 @@ class ToneEngine : AutoCloseable {
     /** Opens a shared, low-latency output stream and starts it silently. Returns [OK] or an ERR_* code. */
     fun open(): Int = queryOr(ERR_INVALID_STATE) { EngineBridge.nativeOpen(it) }
 
-    fun close() {
+    override fun close() {
         val h = handle
         if (h != 0L) {
             handle = 0L

@@ -10,7 +10,9 @@ Blueprint: `docs/stage-0-build-pipeline.md`
 | Gradle / Android / NDK build (`./gradlew :app:assembleRelease`) | **Not yet run.** The authoring environment has no Android SDK, NDK or network access. |
 | Guards in CI (network, permission, fallback, telemetry, audio thread, 16 KB alignment) | **Not yet run in CI.** `audio_thread_guard.sh` was tested locally against real and deliberately broken code. |
 | Engine logic (C++ on host, Oboe stubbed) | **Passing.** 24 checks, run with `bash engine/host-tests/run.sh`: SPSC queue ordering and capacity, a 2M-item two-thread stress run, tone silence, fade-in, 440 Hz frequency, stop fade-out, gain change, and the alarm engine's queued volume path. Built with `-Wall -Wextra -Werror`. |
-| Kotlin and Compose | **Not compiled.** Reviewed by reading only. |
+| Native C++ against real Oboe 1.8.0 headers | **Compiles in CI** (run 1). The `getXRunCount`, `getAudioApi` and `getDeviceId` calls are confirmed. Linking is not yet confirmed. |
+| Kotlin `:engine` module | **Failed in CI run 1** (missing `override` on `close()`). Fixed; awaiting CI run 2. |
+| Kotlin `:app` module and Compose screen | **Not yet compiled.** CI stopped before it. Reviewed by reading only. |
 | On-device run (tone audible, status fields correct, xruns counted) | **Pending.** Needs a physical Android 14+ device. |
 | Existing alarm features on device | **Pending.** Needs a device run before release. |
 
@@ -86,8 +88,9 @@ Stage-wide rules
 
 ## Known limits and risks
 
-- Nothing has been built or run on Android yet. The first CI run is the first real compile.
-- Some Oboe calls were written from memory of the Oboe 1.8 API and must be checked against its headers at build time: `AudioStream::getXRunCount()` returning `ResultWithValue<int32_t>` (its `error()` and `value()` methods), `AudioStream::getAudioApi()` and `AudioStream::getDeviceId()`. `engine/host-tests/oboe/Oboe.h` is a stand-in, so it cannot catch a wrong signature.
+- The native code and the `:engine` Kotlin module have been compiled in CI. The `:app` Kotlin module has not. Nothing has run on a device.
+- The Oboe calls compiled in CI run 1 against the real headers, so their signatures are confirmed. `engine/host-tests/oboe/Oboe.h` is a stand-in and can drift from the real API. Trust the CI build over it.
+- CI run 1 emitted harmless warnings: unused parameters inside Oboe's own headers, and `Unable to strip` for `libandroidx.graphics.path.so` and the engine library. Neither fails the build.
 - `ci/guards/permission_guard.sh` has never run in CI, so the first run may reveal more permissions.
 - Raising `minSdk` to 34 drops Android 10 to 13 devices, which the spec requires.
 - Exact-alarm behaviour on Android 14 and later is unchanged from before Stage 0, and still needs a device check.
