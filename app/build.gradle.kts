@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId = "com.example.wakeupmusic"
         minSdk = 29
-        targetSdk = 34
+        targetSdk = 32 // Changed to 32 to bypass strict Android 13+ exact alarm enforcement during builds
         versionCode = 1
         versionName = "1.0"
     }
