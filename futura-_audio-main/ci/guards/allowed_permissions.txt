@@ -1,0 +1,10 @@
+# One permission per line. Stage 0/1 allows alarm full-screen intent, notifications,
+# and playback-related permissions. READ_MEDIA_AUDIO is declared for Stage 2.
+android.permission.USE_FULL_SCREEN_INTENT
+android.permission.POST_NOTIFICATIONS
+android.permission.READ_MEDIA_AUDIO
+android.permission.FOREGROUND_SERVICE
+android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
+# Framework-generated (AndroidX adds it for dynamic receivers). Signature-level, grants nothing to other apps.
+# Must match the app's namespace.
+com.example.wakeupmusic.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION

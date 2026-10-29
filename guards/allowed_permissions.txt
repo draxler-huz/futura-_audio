@@ -1,8 +1,0 @@
-# One permission per line. Stage 1 allows playback, notifications and READ_MEDIA_AUDIO (declared, requested in Stage 2).
-android.permission.READ_MEDIA_AUDIO
-android.permission.POST_NOTIFICATIONS
-android.permission.FOREGROUND_SERVICE
-android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
-# The entry below is framework-generated (AndroidX adds it for dynamic receivers).
-# It is signature-level and grants nothing to other apps.
-com.futura.audio.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION

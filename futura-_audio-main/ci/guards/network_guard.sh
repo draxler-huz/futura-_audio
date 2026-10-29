@@ -14,8 +14,16 @@ if grep -q 'android.permission.INTERNET' "$MANIFEST"; then
     fail=1
 fi
 
-HITS=$(grep -rnE 'java\.net\.|import java\.net|HttpURLConnection|okhttp|SocketChannel|\bSocket\(|sys/socket\.h' \
-    app/src engine/src || true)
+SRC_DIRS=()
+for d in app/src engine/src; do
+    [[ -d "$d" ]] && SRC_DIRS+=("$d")
+done
+
+HITS=""
+if (( ${#SRC_DIRS[@]} > 0 )); then
+    HITS=$(grep -rnE 'java\.net\.|import java\.net|HttpURLConnection|okhttp|SocketChannel|\bSocket\(|sys/socket\.h' \
+        "${SRC_DIRS[@]}" || true)
+fi
 if [[ -n "$HITS" ]]; then
     echo "::error::network API used outside :net"
     echo "$HITS"
