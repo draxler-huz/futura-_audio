@@ -88,5 +88,3 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 ```[cite: 5]
-
-Replace your `.github/workflows/build.yml` with this version, save it, and push it to GitHub. The syntax validator will pass cleanly now!
