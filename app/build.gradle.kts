@@ -57,6 +57,11 @@ android {
         }
     }
 
+    // The embedded fallback sound must be stored uncompressed so it can be opened as a file descriptor.
+    androidResources {
+        noCompress += "wav"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

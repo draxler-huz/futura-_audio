@@ -77,6 +77,7 @@ jobs:
         run: |
           APK=$(find app/build/outputs/apk/release -name '*.apk' | head -n 1)
           bash ci/guards/network_guard.sh
+          bash ci/guards/fallback_guard.sh
           bash ci/guards/telemetry_guard.sh
           bash ci/guards/alignment_guard.sh "$APK"
 

@@ -7,10 +7,15 @@ import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.*
+import com.example.wakeupmusic.data.AlarmConfig
+import com.example.wakeupmusic.data.AlarmDao
+import com.example.wakeupmusic.data.FuturaStorage
+import com.example.wakeupmusic.data.Preflight
 import java.util.Calendar
 
 class MainActivity : Activity() {
@@ -18,6 +23,8 @@ class MainActivity : Activity() {
     private val prefs by lazy { getSharedPreferences("settings", MODE_PRIVATE) }
     private lateinit var timePicker: TimePicker
     private lateinit var status: TextView
+    private lateinit var trackStatus: TextView
+    private val storage by lazy { FuturaStorage.get(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +99,13 @@ class MainActivity : Activity() {
         addSlider(root, "Mid dB", "eq_mid", -6, 6, 0)
         addSlider(root, "Treble dB", "eq_high", -6, 6, 0)
 
+        // Alarm track (Stage 0.3): copied into private storage, hashed and verified, so the alarm never needs the network
+        root.addView(TextView(this).apply { text = "Alarm track"; setPadding(0, 32, 0, 0) })
+        trackStatus = TextView(this)
+        root.addView(trackStatus)
+        root.addView(Button(this).apply { text = "Choose alarm track"; setOnClickListener { pickTrack() } })
+        root.addView(Button(this).apply { text = "Use built-in sounds"; setOnClickListener { clearTrack() } })
+
         root.addView(Button(this).apply {
       text = "Set alarm"
       setOnClickListener {
@@ -107,8 +121,14 @@ class MainActivity : Activity() {
         status = TextView(this).apply { setPadding(0, 32, 0, 0) }
         root.addView(status)
         showStatus()
+        refreshTrackStatus()
 
         setContentView(ScrollView(this).apply { addView(root, ViewGroup.LayoutParams(-1, -2)) })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        runPreflight()
     }
 
     // Slider that stores an integer in prefs. The label shows the current value.
@@ -164,6 +184,17 @@ class MainActivity : Activity() {
         // setAlarmClock is the alarm-clock API: precise timing, works in Doze, no extra permission
         am.setAlarmClock(AlarmManager.AlarmClockInfo(cal.timeInMillis, showIntent), alarmIntent())
         prefs.edit().putLong("alarm_time", cal.timeInMillis).apply()
+
+        // Record the configuration, then verify the track now and again shortly before the alarm
+        val existing = storage.alarms.get(AlarmDao.PRIMARY_ID) ?: AlarmConfig(id = AlarmDao.PRIMARY_ID)
+        storage.alarms.upsert(
+            existing.copy(
+                hour = timePicker.hour, minute = timePicker.minute,
+                enabled = true, nextTriggerAtMs = cal.timeInMillis,
+            )
+        )
+        Preflight.schedule(this, cal.timeInMillis)
+        runPreflight()
         showStatus()
     }
 
@@ -171,7 +202,66 @@ class MainActivity : Activity() {
         val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.cancel(alarmIntent())
         prefs.edit().remove("alarm_time").apply()
+        storage.alarms.setEnabled(AlarmDao.PRIMARY_ID, false)
+        Preflight.cancel(this)
         showStatus()
+    }
+
+    private fun pickTrack() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "audio/*"
+        }
+        startActivityForResult(intent, REQ_PICK_TRACK)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val uri: Uri = data?.data ?: return
+        if (requestCode != REQ_PICK_TRACK || resultCode != RESULT_OK) return
+        trackStatus.text = "Copying and verifying..."
+        Thread {
+            val message = try {
+                val track = storage.trackStore.importFromUri(uri)
+                val alarm = storage.alarms.get(AlarmDao.PRIMARY_ID)
+                    ?: AlarmConfig(id = AlarmDao.PRIMARY_ID, hour = timePicker.hour, minute = timePicker.minute)
+                storage.alarms.upsert(alarm.copy(trackId = track.id))
+                Preflight.run(this)
+                null
+            } catch (e: Throwable) {
+                "Could not use that file: ${e.message ?: e.javaClass.simpleName}"
+            }
+            runOnUiThread {
+                refreshTrackStatus()
+                if (message != null) trackStatus.text = message
+            }
+        }.start()
+    }
+
+    private fun clearTrack() {
+        storage.alarms.get(AlarmDao.PRIMARY_ID)?.let { storage.alarms.setTrack(it.id, null) }
+        refreshTrackStatus()
+    }
+
+    private fun runPreflight() {
+        Thread {
+            runCatching { Preflight.run(this) }
+            runOnUiThread { refreshTrackStatus() }
+        }.start()
+    }
+
+    // Shows the stored state only. The hash check itself runs in Preflight, off the UI thread.
+    private fun refreshTrackStatus() {
+        val trackId = storage.alarms.get(AlarmDao.PRIMARY_ID)?.trackId
+        val track = trackId?.let { storage.tracks.get(it) }
+        trackStatus.text = when {
+            trackId == null -> "Built-in device sounds"
+            track == null -> "Chosen track is missing. The built-in fallback sound will play."
+            track.cacheState == com.example.wakeupmusic.data.CacheState.VERIFIED ->
+                "${track.displayName} (verified offline)"
+            else -> "${track.displayName} (${track.cacheState.name.lowercase()}). The built-in fallback sound will play."
+        }
     }
 
     private fun alarmIntent(): PendingIntent = PendingIntent.getBroadcast(
@@ -183,5 +273,9 @@ class MainActivity : Activity() {
         val t = prefs.getLong("alarm_time", 0L)
         status.text = if (t == 0L) "No alarm set" else "Alarm set for " +
             java.text.SimpleDateFormat("EEE HH:mm", java.util.Locale.getDefault()).format(t)
+    }
+
+    private companion object {
+        const val REQ_PICK_TRACK = 3001
     }
 }

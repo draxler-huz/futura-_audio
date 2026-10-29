@@ -15,6 +15,14 @@
 - Volume warning above 80%
 - Always-visible dismiss button
 
+## Stage 0.3: storage, database and asset management
+- Two separate databases (plain SQLite, no new dependencies): `alarms.db` holds alarm configuration (time, repeat mask, enabled, next trigger, wake-up verification type and params, track reference). `audio_library.db` holds audio metadata (path, duration, BPM, gain, stem group and role, SHA-256, size, cache state).
+- Tracks picked by the user are copied into app-private storage, hashed and probed. Only VERIFIED local files can play at alarm time. Alarm playback reads local storage only.
+- `Preflight` re-verifies the track when the alarm is set, when the app opens, and about 30 minutes before the alarm (`PreflightReceiver`). Remote tracks are downloaded there through a `TrackFetcher`. The app module has no network code (see `network_guard.sh`), so a future network module must register the fetcher. Until then, remote tracks stay PENDING and the fallback plays.
+- Fail-safe sound: `res/raw/futura_fallback.wav` (packaged uncompressed in the APK). If the chosen track is missing, corrupt, hash-mismatched or rejected by the decoder, it plays at once. If the native engine cannot play it, MediaPlayer plays it, and if that fails a tone synthesised in code (`EmergencyTone`) plays. `ci/guards/fallback_guard.sh` checks the asset exists.
+- Per-track gain is applied to the volume. A boost never pushes the level above 80% unless the user's own volume is already higher.
+- Not exposed in the UI yet: repeat days, wake-up verification, BPM, stems. The schema stores them.
+
 ## Known limits (be honest about these in your report)
 - Not compiled or tested by the author. Check it on a device before submitting.
 - Playback runs only while the alarm activity is alive. A production app needs a foreground service.
