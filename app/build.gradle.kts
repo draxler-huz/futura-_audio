@@ -19,12 +19,7 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-    lint {
-        // Disable fatal errors or explicitly ignore the target SDK check and abort flags
-        checkReleaseBuilds = false
-        abortOnError = false
-        disable.add("ExpiredTargetSdkVersion")
-    }
+    
     signingConfigs {
         if (keystoreFile != null) {
             create("release") {
