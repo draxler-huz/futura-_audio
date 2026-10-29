@@ -86,7 +86,16 @@ class MainActivity : Activity() {
         }
         root.addView(volume)
 
-        root.addView(Button(this).apply { text = "Set alarm"; setOnClickListener { setAlarm() } })
+          root.addView(Button(this).apply {
+      text = "Set alarm"
+      setOnClickListener {
+          try {
+              setAlarm()
+          } catch (e: Throwable) {
+              status.text = "Error: ${e.javaClass.simpleName}: ${e.message}"
+          }
+      }
+  })
         root.addView(Button(this).apply { text = "Cancel alarm"; setOnClickListener { cancelAlarm() } })
 
         status = TextView(this).apply { setPadding(0, 32, 0, 0) }
