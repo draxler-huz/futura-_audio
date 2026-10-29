@@ -7,12 +7,12 @@ Blueprint: `docs/stage-0-build-pipeline.md`
 
 | Check | State |
 |---|---|
-| Gradle / Android / NDK build (`./gradlew :app:assembleRelease`) | **Not yet run.** The authoring environment has no Android SDK, NDK or network access. |
-| Guards in CI (network, permission, fallback, telemetry, audio thread, 16 KB alignment) | **Not yet run in CI.** `audio_thread_guard.sh` was tested locally against real and deliberately broken code. |
+| Gradle / Android / NDK build (`./gradlew :app:assembleRelease`) | **Passes in CI** (run 2). Native code, `:engine` Kotlin and `:app` Kotlin all compile. Warnings only. |
+| Guards in CI (network, permission, fallback, telemetry, audio thread, 16 KB alignment) | **Network, permission, fallback and telemetry pass** (run 2). Audio thread guard failed in run 2 on a script bug, now fixed and tested locally. Alignment not yet reached in CI. |
 | Engine logic (C++ on host, Oboe stubbed) | **Passing.** 24 checks, run with `bash engine/host-tests/run.sh`: SPSC queue ordering and capacity, a 2M-item two-thread stress run, tone silence, fade-in, 440 Hz frequency, stop fade-out, gain change, and the alarm engine's queued volume path. Built with `-Wall -Wextra -Werror`. |
 | Native C++ against real Oboe 1.8.0 headers | **Compiles in CI** (run 1). The `getXRunCount`, `getAudioApi` and `getDeviceId` calls are confirmed. Linking is not yet confirmed. |
-| Kotlin `:engine` module | **Failed in CI run 1** (missing `override` on `close()`). Fixed; awaiting CI run 2. |
-| Kotlin `:app` module and Compose screen | **Not yet compiled.** CI stopped before it. Reviewed by reading only. |
+| Kotlin `:engine` module | **Compiles in CI** (run 2). Run 1 failed on a missing `override`, now fixed. |
+| Kotlin `:app` module and Compose screen | **Compiles in CI** (run 2). Only deprecation warnings from `AlarmReceiver.kt`, which is unchanged. Runtime behaviour not yet tested on a device. |
 | On-device run (tone audible, status fields correct, xruns counted) | **Pending.** Needs a physical Android 14+ device. |
 | Existing alarm features on device | **Pending.** Needs a device run before release. |
 
@@ -60,7 +60,7 @@ Spec section 0.2, toolchain pins
 - [x] Every exact version recorded in this file.
 - [x] 16 KB page alignment: link flags set in `CMakeLists.txt`.
 - [x] CI verifies alignment of every `.so` and fails if one is not aligned (`REQUIRE_NATIVE=1`).
-- [ ] Confirm the CI alignment check passes on a real build.
+- [ ] Confirm the CI alignment check passes on a real build (not yet reached in CI).
 
 Spec section 0.5, skeleton app
 - [x] One Compose screen with a **Play test tone** button. The button shows **Stop test tone** while the tone plays.
@@ -88,10 +88,10 @@ Stage-wide rules
 
 ## Known limits and risks
 
-- The native code and the `:engine` Kotlin module have been compiled in CI. The `:app` Kotlin module has not. Nothing has run on a device.
+- The whole app builds in CI (run 2). Nothing has run on a device, and the alignment guard has not yet been reached.
 - The Oboe calls compiled in CI run 1 against the real headers, so their signatures are confirmed. `engine/host-tests/oboe/Oboe.h` is a stand-in and can drift from the real API. Trust the CI build over it.
 - CI run 1 emitted harmless warnings: unused parameters inside Oboe's own headers, and `Unable to strip` for `libandroidx.graphics.path.so` and the engine library. Neither fails the build.
-- `ci/guards/permission_guard.sh` has never run in CI, so the first run may reveal more permissions.
+- `permission_guard.sh` passed in CI run 2, so the allowlist change matches the merged manifest.
 - Raising `minSdk` to 34 drops Android 10 to 13 devices, which the spec requires.
 - Exact-alarm behaviour on Android 14 and later is unchanged from before Stage 0, and still needs a device check.
 
