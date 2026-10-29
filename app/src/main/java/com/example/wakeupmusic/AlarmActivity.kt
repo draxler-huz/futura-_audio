@@ -17,6 +17,8 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.wakeupmusic.audio.CompressorSettings
+import com.example.wakeupmusic.audio.EqBand
+import com.example.wakeupmusic.audio.EqType
 import com.example.wakeupmusic.audio.NativeAudioEngine
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -142,8 +144,11 @@ class AlarmActivity : Activity() {
                 eng.close()
                 return false
             }
-            eng.setVolume(volume)
+            // Fade-in is off (0 s) by default, which applies the volume immediately as before.
+            val fadeMs = prefs.getInt("fade_seconds", 0) * 1000
+            eng.setVolume(volume, fadeMs, NativeAudioEngine.CURVE_LOGARITHMIC)
             eng.setCompressor(CompressorSettings())
+            eng.setEq(eqBands())
             if (gen != playGeneration || eng.start() != NativeAudioEngine.OK) {
                 eng.close()
                 return false
@@ -155,6 +160,19 @@ class AlarmActivity : Activity() {
             candidate?.close()
             false
         }
+    }
+
+    // Flat (all 0 dB) returns an empty list, which bypasses the EQ.
+    private fun eqBands(): List<EqBand> {
+        val low = prefs.getInt("eq_low", 0)
+        val mid = prefs.getInt("eq_mid", 0)
+        val high = prefs.getInt("eq_high", 0)
+        if (low == 0 && mid == 0 && high == 0) return emptyList()
+        return listOf(
+            EqBand(EqType.LOW_SHELF, 100f, 0.707f, low.toFloat()),
+            EqBand(EqType.PEAKING, 1000f, 0.707f, mid.toFloat()),
+            EqBand(EqType.HIGH_SHELF, 8000f, 0.707f, high.toFloat()),
+        )
     }
 
     private fun startMediaPlayer(uri: Uri, volume: Float) {

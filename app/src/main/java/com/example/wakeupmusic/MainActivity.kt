@@ -86,7 +86,13 @@ class MainActivity : Activity() {
         }
         root.addView(volume)
 
-          root.addView(Button(this).apply {
+          root.addView(TextView(this).apply { text = "Sound (0 = off / flat)"; setPadding(0, 32, 0, 0) })
+        addSlider(root, "Fade-in seconds", "fade_seconds", 0, 60, 0)
+        addSlider(root, "Bass dB", "eq_low", -6, 6, 0)
+        addSlider(root, "Mid dB", "eq_mid", -6, 6, 0)
+        addSlider(root, "Treble dB", "eq_high", -6, 6, 0)
+
+        root.addView(Button(this).apply {
       text = "Set alarm"
       setOnClickListener {
           try {
@@ -103,6 +109,27 @@ class MainActivity : Activity() {
         showStatus()
 
         setContentView(ScrollView(this).apply { addView(root, ViewGroup.LayoutParams(-1, -2)) })
+    }
+
+    // Slider that stores an integer in prefs. The label shows the current value.
+    private fun addSlider(root: LinearLayout, label: String, key: String, lo: Int, hi: Int, default: Int) {
+        val valueView = TextView(this)
+        val current = prefs.getInt(key, default)
+        valueView.text = "$label: $current"
+        root.addView(valueView)
+        root.addView(SeekBar(this).apply {
+            max = hi - lo
+            progress = current - lo
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(s: SeekBar?, p: Int, fromUser: Boolean) {
+                    valueView.text = "$label: ${p + lo}"
+                }
+                override fun onStartTrackingTouch(s: SeekBar?) {}
+                override fun onStopTrackingTouch(s: SeekBar?) {
+                    prefs.edit().putInt(key, (s?.progress ?: 0) + lo).apply()
+                }
+            })
+        })
     }
 
     private fun showAgreement(onResult: (Boolean) -> Unit) {

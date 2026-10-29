@@ -169,11 +169,11 @@ void AudioEngine::applyStaged() {
     if (staged_.volumeSeq != appliedVolumeSeq_) {
         const int32_t rampFrames = static_cast<int32_t>(static_cast<float>(staged_.volumeRampMs) * sr / 1000.0f);
         if (appliedVolumeSeq_ == 0) {
-            // First configuration: set the level without a ramp from the default.
-            ramp_.reset(staged_.volumeTarget);
-        } else {
-            ramp_.setTarget(staged_.volumeTarget, rampFrames, staged_.volumeCurve);
+            // First configuration starts from silence, so a fade-in ramps up from 0.
+            // With rampMs = 0 the target applies immediately.
+            ramp_.reset(0.0f);
         }
+        ramp_.setTarget(staged_.volumeTarget, rampFrames, staged_.volumeCurve);
         appliedVolumeSeq_ = staged_.volumeSeq;
     }
     if (staged_.compressorSeq != appliedCompressorSeq_) {
