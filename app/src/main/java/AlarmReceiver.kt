@@ -1,4 +1,4 @@
-package com.example.musicalarm
+package com.example.wakeupmusic
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -12,7 +12,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = powerManager.newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
-            "MusicAlarm:ReceiverWakeLock"
+            "WakeUpMusic:ReceiverWakeLock"
         )
         wakeLock.acquire(10 * 60 * 1000L) // 10 minutes max safeguard
 

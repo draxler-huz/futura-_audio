@@ -1,4 +1,4 @@
-package com.example.musicalarm
+package com.example.wakeupmusic
 
 import android.app.AlarmManager
 import android.app.PendingIntent

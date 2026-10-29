@@ -1,4 +1,4 @@
-package com.example.musicalarm
+package com.example.wakeupmusic
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -22,7 +22,7 @@ class AlarmAudioService : Service() {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
-            "MusicAlarm:ServiceWakeLock"
+            "WakeUpMusic:ServiceWakeLock"
         ).apply {
             acquire(15 * 60 * 1000L)
         }
@@ -54,7 +54,7 @@ class AlarmAudioService : Service() {
 
     private fun playAlarmStream() {
         try {
-            // Uses a local raw resource audio file (res/raw/alarm_fallback.mp3)
+            // Uses a local raw resource audio file (res/raw/alarm_fallback.mp3 or .wav)
             mediaPlayer = MediaPlayer.create(this, R.raw.alarm_fallback).apply {
                 isLooping = true
                 setAudioAttributes(
