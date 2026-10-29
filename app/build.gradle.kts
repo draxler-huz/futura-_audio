@@ -11,6 +11,8 @@ val keystoreFile: File? = keystorePath?.let { File(it) }?.takeIf { it.exists() &
 android {
     namespace = "com.example.wakeupmusic"
     compileSdk = 34
+    // Matches the NDK that .github/workflows/build.yml installs.
+    ndkVersion = "28.0.13004108"
 
     defaultConfig {
         applicationId = "com.example.wakeupmusic"
@@ -18,8 +20,16 @@ android {
         targetSdk = 34 // Changed to 34 to bypass strict Android 13+ exact alarm enforcement during builds
         versionCode = 1
         versionName = "1.0"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags += "-std=c++17"
+                // Oboe's prefab libraries are built against the shared C++ runtime.
+                arguments += "-DANDROID_STL=c++_shared"
+            }
+        }
     }
-    
+
     signingConfigs {
         if (keystoreFile != null) {
             create("release") {
@@ -40,6 +50,17 @@ android {
         }
     }
 
+    buildFeatures {
+        prefab = true
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -47,4 +68,9 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
+
+dependencies {
+    // Low-latency native audio output (AAudio with OpenSL ES fallback), shipped as a prefab AAR.
+    implementation("com.google.oboe:oboe:1.8.0")
 }
