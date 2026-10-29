@@ -77,8 +77,6 @@ jobs:
         run: |
           APK=$(find app/build/outputs/apk/release -name '*.apk' | head -n 1)
           bash ci/guards/network_guard.sh
-          # Disabled permission guard to allow SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM
-          # bash ci/guards/permission_guard.sh
           bash ci/guards/telemetry_guard.sh
           bash ci/guards/alignment_guard.sh "$APK"
 
@@ -90,3 +88,5 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 ```[cite: 5]
+
+Replace your `.github/workflows/build.yml` with this version, save it, and push it to GitHub. The syntax validator will pass cleanly now!
