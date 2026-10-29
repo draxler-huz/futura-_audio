@@ -74,11 +74,16 @@ jobs:
         run: ./gradlew --no-daemon :app:assembleRelease
 
       - name: Run guards
+        env:
+          # Stage 0: the APK must contain native libraries, and every one must be 16 KB aligned.
+          REQUIRE_NATIVE: "1"
         run: |
           APK=$(find app/build/outputs/apk/release -name '*.apk' | head -n 1)
           bash ci/guards/network_guard.sh
+          bash ci/guards/permission_guard.sh
           bash ci/guards/fallback_guard.sh
           bash ci/guards/telemetry_guard.sh
+          bash ci/guards/audio_thread_guard.sh
           bash ci/guards/alignment_guard.sh "$APK"
 
       - name: Upload APK

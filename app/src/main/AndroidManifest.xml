@@ -3,8 +3,8 @@
 
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
-    <!-- ADDED: Required permissions to set exact alarms -->
+
+    <!-- Exact alarm scheduling. Present since before Stage 0. Listed in ci/guards/allowed_permissions.txt. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
@@ -29,6 +29,11 @@
             android:turnScreenOn="true"
             android:launchMode="singleTop"
             android:excludeFromRecents="true" />
+
+        <!-- Stage 0 skeleton: Compose screen with the test tone and engine status. Reached from MainActivity. -->
+        <activity
+            android:name=".skeleton.SkeletonActivity"
+            android:exported="false" />
 
         <receiver
             android:name=".AlarmReceiver"

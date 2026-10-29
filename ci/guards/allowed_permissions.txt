@@ -5,6 +5,9 @@ android.permission.POST_NOTIFICATIONS
 android.permission.READ_MEDIA_AUDIO
 android.permission.FOREGROUND_SERVICE
 android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
+# Exact alarm scheduling. Declared in the app manifest before Stage 0 (AlarmManager.setAlarmClock).
+android.permission.SCHEDULE_EXACT_ALARM
+android.permission.USE_EXACT_ALARM
 # Framework-generated (AndroidX adds it for dynamic receivers). Signature-level, grants nothing to other apps.
 # Must match the app's namespace.
 com.example.wakeupmusic.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION

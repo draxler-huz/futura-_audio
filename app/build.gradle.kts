@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 // Signing is configured only when CI provides a non-empty keystore.
@@ -10,24 +11,14 @@ val keystoreFile: File? = keystorePath?.let { File(it) }?.takeIf { it.exists() &
 
 android {
     namespace = "com.example.wakeupmusic"
-    compileSdk = 34
-    // Matches the NDK that .github/workflows/build.yml installs.
-    ndkVersion = "28.0.13004108"
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.wakeupmusic"
-        minSdk = 29
-        targetSdk = 34 // Changed to 34 to bypass strict Android 13+ exact alarm enforcement during builds
+        minSdk = 34          // Android 14
+        targetSdk = 36       // Android 16
         versionCode = 1
         versionName = "1.0"
-
-        externalNativeBuild {
-            cmake {
-                cppFlags += "-std=c++17"
-                // Static C++ runtime: no libc++_shared.so in the APK, so nothing unaligned is packaged.
-                arguments += "-DANDROID_STL=c++_static"
-            }
-        }
     }
 
     signingConfigs {
@@ -50,16 +41,13 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
-
     // The embedded fallback sound must be stored uncompressed so it can be opened as a file descriptor.
     androidResources {
         noCompress += "wav"
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     compileOptions {
@@ -70,9 +58,18 @@ android {
         jvmTarget = "17"
     }
 }
-// ADD THIS BLOCK AT THE END OF THE FILE
+
 dependencies {
+    // Native audio engine (C++ via :engine). Replaces the native code that used to live in :app.
+    implementation(project(":engine"))
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
+
+    // Compose UI (Stage 0 skeleton screen).
+    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.activity:activity-compose:1.9.3")
 }

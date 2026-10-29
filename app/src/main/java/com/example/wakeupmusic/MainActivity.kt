@@ -16,6 +16,7 @@ import com.example.wakeupmusic.data.AlarmConfig
 import com.example.wakeupmusic.data.AlarmDao
 import com.example.wakeupmusic.data.FuturaStorage
 import com.example.wakeupmusic.data.Preflight
+import com.example.wakeupmusic.skeleton.SkeletonActivity
 import java.util.Calendar
 
 class MainActivity : Activity() {
@@ -105,6 +106,12 @@ class MainActivity : Activity() {
         root.addView(trackStatus)
         root.addView(Button(this).apply { text = "Choose alarm track"; setOnClickListener { pickTrack() } })
         root.addView(Button(this).apply { text = "Use built-in sounds"; setOnClickListener { clearTrack() } })
+
+        // Stage 0: skeleton test tone and engine status. Keeps the alarm UI untouched.
+        root.addView(Button(this).apply {
+            text = "Audio engine test (Stage 0)"
+            setOnClickListener { startActivity(Intent(this@MainActivity, SkeletonActivity::class.java)) }
+        })
 
         root.addView(Button(this).apply {
       text = "Set alarm"
