@@ -1,0 +1,33 @@
+name: Make Gradle wrapper
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.11.1
+
+      - name: Generate wrapper
+        env:
+          CI: "false"
+        run: gradle wrapper --gradle-version 8.11.1
+
+      - name: Save wrapper to repository
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Add Gradle wrapper 8.11.1"
+          file_pattern: gradlew gradlew.bat gradle/wrapper/*
