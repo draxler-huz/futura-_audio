@@ -12,7 +12,7 @@ FetchContent_Declare(futura_minimp3
     GIT_SHALLOW TRUE)
 FetchContent_Declare(futura_drlibs
     GIT_REPOSITORY https://github.com/mackron/dr_libs.git
-    GIT_TAG baa9558d1ecbe01b25f90c675996c4530b0fb75f          # Public domain or MIT-0 (choice)
+    GIT_TAG e84e28a98d0503b762053415419919623e9d6c96          # Public domain or MIT-0 (choice)
     GIT_SHALLOW TRUE)
 FetchContent_Declare(futura_stb
     GIT_REPOSITORY https://github.com/nothings/stb.git

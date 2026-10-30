@@ -137,3 +137,5 @@ Stage-wide rules
 ## Next stage
 
 Stage 2: the library. It needs the `READ_MEDIA_AUDIO` runtime request, a seek index for MP3 and Opus, and the library database (uses the Stage 0 storage pattern).
+
+N/B everything in stage 1 tests runs weel

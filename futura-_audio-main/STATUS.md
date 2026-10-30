@@ -40,7 +40,7 @@ Pinned in `engine/src/main/cpp/player/decoders.cmake`. Each commit was resolved 
 | Dependency | Pin | Used for | Licence (read from the repo's LICENSE) |
 |---|---|---|---|
 | minimp3 | `lieff/minimp3` @ `ea99364f61c14656440e8d77e9c233ccf3124633` | MP3 decoding | CC0-1.0 |
-| dr_libs | `mackron/dr_libs` @ `baa9558d1ecbe01b25f90c675996c4530b0fb75f` | FLAC decoding (`dr_flac.h`) | Public domain or MIT-0, at our choice |
+| dr_libs | `mackron/dr_libs` @ `e84e28a98d0503b762053415419919623e9d6c96` | FLAC decoding (`dr_flac.h`) | Public domain or MIT-0, at our choice |
 | stb | `nothings/stb` @ `003501f6d7a8668ce8b6d875e34dd97ad0d5d5b5` | Ogg Vorbis (`stb_vorbis.c`) | Public domain or MIT, at our choice |
 | libopus | `xiph/opus` tag `v1.5.2` (commit `ddbe48383984d56acd9e1ab6a090c54ca6b735a6`) | Opus decoding | BSD-3-Clause. **Check the full LICENSE file before release;** only the copyright header was read. |
 | Apple ALAC | `macosforge/alac` @ `c38887c5c5e64a4b31108733bd79ca9b2496d987` | ALAC decoding (Android only) | Apache-2.0 |
