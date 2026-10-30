@@ -266,4 +266,4 @@ Finish Stage 2 first, then move on:
 5. Confirm the dr_libs pin with `git ls-remote`.
 6. CI build and device run for Stages 0, 1 and 2 together, including the 10,000-track scan, the airplane-mode check, and an alarm that rings with the app closed and the screen locked.
 
-N/B everything in stage 1 tests runs weel
+N/B everything in stage 1 tests runs well
