@@ -56,7 +56,7 @@ class FuturaPlayer(
     private val reader = TrackMetadataReader(appContext)
     private val mapper = MediaButtonMapper(store.readMapping())
 
-    private val focusListener = object : AudioFocusController.Listener {
+    private val focusListener: AudioFocusController.Listener = object : AudioFocusController.Listener {
         override fun onFocusPause(transient: Boolean) {
             if (!playWhen) return
             playWhen = false
@@ -83,7 +83,7 @@ class FuturaPlayer(
             if (playWhen) setPlayIntent(false)
         }
     }
-    private val focus = AudioFocusController(appContext, focusListener)
+    private val focus: AudioFocusController = AudioFocusController(appContext, focusListener)
 
     // ---- Main-thread mirror state. Only the main thread reads or writes these. ----
     private var uris: List<Uri> = emptyList()
