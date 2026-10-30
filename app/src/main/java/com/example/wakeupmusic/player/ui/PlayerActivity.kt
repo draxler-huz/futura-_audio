@@ -86,7 +86,7 @@ class PlayerActivity : ComponentActivity() {
 private enum class PlayerSection { NOW, SETTINGS, FORMAT }
 
 /**
- * Picker filter. "audio/*" greys out files whose MIME type the provider cannot name (FLAC, Opus, M4A on many providers).
+ * Picker filter. The old audio filter greyed out files whose MIME type the provider cannot name (FLAC, Opus, M4A on many providers).
  * The decoders sniff the format themselves, so every file is offered and the wrong ones simply fail to open.
  */
 internal val PICKER_MIME_TYPES = arrayOf("*/*")
