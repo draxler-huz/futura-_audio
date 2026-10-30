@@ -114,8 +114,8 @@ Stage-wide rules
 
 ## Decisions made at Stage 1
 
-- **DSD moved to Stage 3.** Allowed by the spec, because Stage 1 was too large. `decoder_factory.cpp` returns kUnsupportedFormat for DSF and DFF, and the format self-test reports it.
-- alarm option pushed to stage 2,a button on the alarm screen that opens the app, with the alarm still ringing. A fork has to confirm the alarm survives leaving its activity, because the README says playback runs only while that activity is alive.stage 2 must build this
+- **DSD moved to Stage 3.** Allowed by the spec, because Stage 1 was too large. `decoder_factory.cpp` returns kUnsupportedFormat for DSF and DFF, and the format self-test reports it
+- Stage 2 must  introduces an independent foreground service architecture that decouples alarm playback from the UI activity, ensuring audio and system-level alarm status survive when users navigate away from the ringing screen. By integrating a persistent high-priority notification and media-backed playback controls, the feature allows users to seamlessly exit the alarm interface and utilize the rest of the application normally, while the operating system and device state continue to treat the active alarm as fully engaged until explicitly dismissed.
 - **Opus uses libopus.** Using a libopus decoder is a deliberate choice, since "a small decoder" for Opus would be a poorer one. The Ogg demuxer and the OpusHead parser are our own. Opus mapping family 1 is accepted for one or two channels only. Multistream is rejected.
 - **MP3 gapless trim is padding minus 529, as ffmpeg does.** The skip is the LAME encoder delay plus 529. Both match ffprobe on the test fixtures.
 - **Resampler is cubic Hermite, not windowed-sinc.** It is good for music in the tests (worst error 2.2e-4), but it is not a bit-exact or audiophile-grade converter. Upgrading it is a later task.

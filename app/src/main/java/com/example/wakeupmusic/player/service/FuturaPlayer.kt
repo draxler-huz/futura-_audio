@@ -184,8 +184,8 @@ class FuturaPlayer(
     override fun handleSeek(mediaItemIndex: Int, positionMs: Long, seekCommand: Int): ListenableFuture<*> {
         val ms = if (positionMs == C.TIME_UNSET || positionMs < 0) 0L else positionMs
         when (seekCommand) {
-            Player.COMMAND_SEEK_TO_NEXT, Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> next()
-            Player.COMMAND_SEEK_TO_PREVIOUS, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM -> previous()
+            Player.COMMAND_SEEK_TO_NEXT, Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> skipToNext()
+            Player.COMMAND_SEEK_TO_PREVIOUS, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM -> skipToPrevious()
             else -> if (mediaItemIndex in uris.indices && mediaItemIndex != index) {
                 jumpTo(mediaItemIndex, ms)
             } else {
@@ -256,8 +256,8 @@ class FuturaPlayer(
     private fun performAction(action: ButtonAction) {
         when (action) {
             ButtonAction.PLAY_PAUSE -> setPlayIntent(!playWhen)
-            ButtonAction.NEXT -> next()
-            ButtonAction.PREVIOUS -> previous()
+            ButtonAction.NEXT -> skipToNext()
+            ButtonAction.PREVIOUS -> skipToPrevious()
             ButtonAction.SHUFFLE -> setShuffle(!shuffle)
             ButtonAction.NONE -> Unit
         }
@@ -330,18 +330,18 @@ class FuturaPlayer(
         save()
     }
 
-    private fun next() {
-        val n = pickNext(index, uris.size, shuffle) ?: return
-        jumpTo(n, 0L)
-    }
+    private fun skipToNext() {
+    val n = pickNext(index, uris.size, shuffle) ?: return
+    jumpTo(n, 0L)
+}
 
-    private fun previous() {
-        if (positionMs > PREVIOUS_RESTART_MS || index <= 0) {
-            seekInCurrent(0L)
-        } else {
-            jumpTo(index - 1, 0L)
-        }
+private fun skipToPrevious() {
+    if (positionMs > PREVIOUS_RESTART_MS || index <= 0) {
+        seekInCurrent(0L)
+    } else {
+        jumpTo(index - 1, 0L)
     }
+}
 
     private fun jumpTo(n: Int, ms: Long) {
         index = n
