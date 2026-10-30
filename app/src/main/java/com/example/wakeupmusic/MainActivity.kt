@@ -16,6 +16,7 @@ import com.example.wakeupmusic.data.AlarmConfig
 import com.example.wakeupmusic.data.AlarmDao
 import com.example.wakeupmusic.data.FuturaStorage
 import com.example.wakeupmusic.data.Preflight
+import com.example.wakeupmusic.player.ui.PlayerActivity
 import com.example.wakeupmusic.skeleton.SkeletonActivity
 import java.util.Calendar
 
@@ -111,6 +112,12 @@ class MainActivity : Activity() {
         root.addView(Button(this).apply {
             text = "Audio engine test (Stage 0)"
             setOnClickListener { startActivity(Intent(this@MainActivity, SkeletonActivity::class.java)) }
+        })
+
+        // Stage 1: the music player (separate from the alarm).
+        root.addView(Button(this).apply {
+            text = "Music player (Stage 1)"
+            setOnClickListener { startActivity(Intent(this@MainActivity, PlayerActivity::class.java)) }
         })
 
         root.addView(Button(this).apply {

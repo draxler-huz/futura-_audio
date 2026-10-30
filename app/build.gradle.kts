@@ -72,4 +72,9 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.activity:activity-compose:1.9.3")
+
+    // Stage 1 playback: media session and service. Do not add media3-exoplayer: the native engine plays.
+    implementation("androidx.media3:media3-session:1.6.1")
+
+    testImplementation("junit:junit:4.13.2")
 }

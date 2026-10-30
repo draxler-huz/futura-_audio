@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22.1)
-project(futura_engine LANGUAGES CXX)
+project(futura_engine LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,12 +29,19 @@ add_library(futura_audio SHARED
     track_loader.cpp
     jni_bridge.cpp
     tone_engine.cpp
-    tone_jni.cpp)
+    tone_jni.cpp
+    player/player_engine.cpp
+    player/resampler.cpp
+    player/player_jni.cpp)
 
 target_compile_options(futura_audio PRIVATE -Wall -Wextra)
 
+# Stage 1 decoders: WAV, FLAC, MP3, Vorbis, Opus, AAC and ALAC (Android only). Pinned third-party code.
+include(player/decoders.cmake)
+
 target_link_libraries(futura_audio PRIVATE
     oboe
+    futura_decoders
     mediandk
     android
     log)

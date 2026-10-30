@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <!-- Stage 1 playback. Each one is explained on screen before use (player/ui/PermissionExplanations.kt).
+         READ_MEDIA_AUDIO is declared but not requested yet: the file picker needs no permission. Stage 2 asks for it. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Exact alarm scheduling. Present since before Stage 0. Listed in ci/guards/allowed_permissions.txt. -->
@@ -33,6 +39,20 @@
         <!-- Stage 0 skeleton: Compose screen with the test tone and engine status. Reached from MainActivity. -->
         <activity
             android:name=".skeleton.SkeletonActivity"
+            android:exported="false" />
+
+        <!-- Stage 1 player. Foreground service of type mediaPlayback that hosts the media session. -->
+        <service
+            android:name=".player.service.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".player.ui.PlayerActivity"
             android:exported="false" />
 
         <receiver
