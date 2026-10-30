@@ -2,6 +2,7 @@ package com.example.wakeupmusic.player.ui
 
 import android.Manifest
 import android.content.ComponentName
+import android.content.Intent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -29,6 +30,7 @@ import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.example.wakeupmusic.library.ui.LibraryActivity
 import com.example.wakeupmusic.player.data.PlayerStateStore
 import com.example.wakeupmusic.player.data.SourceOpener
 import com.example.wakeupmusic.player.service.PlaybackService
@@ -65,7 +67,10 @@ class PlayerActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    PlayerRoot(controllerState.value)
+                    PlayerRoot(
+                        controller = controllerState.value,
+                        onOpenLibrary = { startActivity(Intent(this, LibraryActivity::class.java)) },
+                    )
                 }
             }
         }
@@ -80,8 +85,14 @@ class PlayerActivity : ComponentActivity() {
 
 private enum class PlayerSection { NOW, SETTINGS, FORMAT }
 
+/**
+ * Picker filter. "audio/*" greys out files whose MIME type the provider cannot name (FLAC, Opus, M4A on many providers).
+ * The decoders sniff the format themselves, so every file is offered and the wrong ones simply fail to open.
+ */
+internal val PICKER_MIME_TYPES = arrayOf("*/*")
+
 @Composable
-private fun PlayerRoot(controller: MediaController?) {
+private fun PlayerRoot(controller: MediaController?, onOpenLibrary: () -> Unit) {
     val context = LocalContext.current
     val store = remember { PlayerStateStore.create(context) }
     var section by rememberSaveable { mutableStateOf(PlayerSection.NOW) }
@@ -150,10 +161,11 @@ private fun PlayerRoot(controller: MediaController?) {
     when (section) {
         PlayerSection.NOW -> PlayerScreen(
             controller = controller,
-            onPickFiles = { filePicker.launch(arrayOf("audio/*")) },
+            onPickFiles = { filePicker.launch(PICKER_MIME_TYPES) },
             onPlay = { requestPlay() },
             onOpenSettings = { section = PlayerSection.SETTINGS },
             onOpenFormatTest = { section = PlayerSection.FORMAT },
+            onOpenLibrary = onOpenLibrary,
         )
         PlayerSection.SETTINGS -> SettingsScreen(
             store = store,

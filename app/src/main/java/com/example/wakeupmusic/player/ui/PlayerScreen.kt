@@ -44,6 +44,7 @@ fun PlayerScreen(
     onPlay: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenFormatTest: () -> Unit,
+    onOpenLibrary: () -> Unit,
 ) {
     var title by remember { mutableStateOf("Nothing playing") }
     var artist by remember { mutableStateOf("") }
@@ -134,6 +135,7 @@ fun PlayerScreen(
             Text("Open audio files")
         }
         Spacer(Modifier.height(8.dp))
+        TextButton(onClick = onOpenLibrary) { Text("Music library") }
         TextButton(onClick = onOpenSettings) { Text("Player settings") }
         TextButton(onClick = onOpenFormatTest) { Text("Format self-test") }
     }

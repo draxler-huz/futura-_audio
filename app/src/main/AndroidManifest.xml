@@ -34,6 +34,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Stage 2 alarm service. The alarm rings here, so it keeps going when the screen is closed. -->
+        <service
+            android:name=".AlarmService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
         <activity
             android:name=".AlarmActivity"
             android:exported="false"
@@ -59,6 +65,11 @@
 
         <activity
             android:name=".player.ui.PlayerActivity"
+            android:exported="false" />
+
+        <!-- Stage 2 music library. Shares the playback service with the player. Asks for READ_MEDIA_AUDIO itself. -->
+        <activity
+            android:name=".library.ui.LibraryActivity"
             android:exported="false" />
 
         <receiver

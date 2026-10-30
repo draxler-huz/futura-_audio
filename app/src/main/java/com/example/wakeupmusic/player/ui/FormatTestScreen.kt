@@ -73,7 +73,7 @@ fun FormatTestScreen(onBack: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
         )
         Spacer(Modifier.height(12.dp))
-        Button(onClick = { picker.launch(arrayOf("audio/*")) }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = { picker.launch(PICKER_MIME_TYPES) }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
             Text("Pick a file")
         }
 

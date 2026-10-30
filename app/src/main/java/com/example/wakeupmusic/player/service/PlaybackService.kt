@@ -4,10 +4,16 @@ package com.example.wakeupmusic.player.service
 
 import android.content.Intent
 import android.view.KeyEvent
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.example.wakeupmusic.library.db.LibraryDatabase
+import com.example.wakeupmusic.library.db.LibraryRepository
 import com.example.wakeupmusic.player.data.PlayerStateStore
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Foreground service of type mediaPlayback (feature 1.4). It hosts the media session, so the lock screen, the
@@ -24,9 +30,13 @@ class PlaybackService : MediaSessionService() {
     private var player: FuturaPlayer? = null
     private var session: MediaSession? = null
 
+    /** Play counts go to library.db on this thread, so the player never waits on the database. */
+    private val statsExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+
     override fun onCreate() {
         super.onCreate()
         val p = FuturaPlayer(this, PlayerStateStore.create(this))
+        p.addListener(playStatsListener)
         player = p
         session = MediaSession.Builder(this, p)
             .setCallback(mediaButtonCallback)
@@ -42,7 +52,24 @@ class PlaybackService : MediaSessionService() {
         session = null
         player?.release()
         player = null
+        statsExecutor.shutdown()
         super.onDestroy()
+    }
+
+    /** Counts a play when a track starts on its own, when the user skips to it, or when it repeats. Best effort. */
+    private val playStatsListener = object : Player.Listener {
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED) return
+            val uri = mediaItem?.localConfiguration?.uri?.toString() ?: return
+            val app = applicationContext
+            statsExecutor.execute {
+                try {
+                    LibraryRepository(LibraryDatabase.get(app)).recordPlay(uri, System.currentTimeMillis())
+                } catch (e: Exception) {
+                    // Stats are not worth stopping playback for.
+                }
+            }
+        }
     }
 
     private val mediaButtonCallback = object : MediaSession.Callback {

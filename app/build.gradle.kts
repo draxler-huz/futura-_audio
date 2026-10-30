@@ -76,5 +76,8 @@ dependencies {
     // Stage 1 playback: media session and service. Do not add media3-exoplayer: the native engine plays.
     implementation("androidx.media3:media3-session:1.6.1")
 
+    // Stage 2 library: the folder picker's DocumentFile walk (F06). Plain AndroidX, no network.
+    implementation("androidx.documentfile:documentfile:1.0.1")
+
     testImplementation("junit:junit:4.13.2")
 }

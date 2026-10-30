@@ -3,7 +3,7 @@ package com.example.wakeupmusic.audio
 /**
  * Kotlin side of the native engine (app/src/main/cpp).
  *
- * Threading: every call on one instance must come from the same thread (AlarmActivity uses a
+ * Threading: every call on one instance must come from the same thread (AlarmPlayback uses a
  * single background executor). The native side handles its own audio-thread synchronisation.
  *
  * Lifecycle: create -> loadFile -> setVolume / setCompressor / setEq -> start -> ... -> close.

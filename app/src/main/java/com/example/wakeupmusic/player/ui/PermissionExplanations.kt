@@ -8,9 +8,11 @@ object PermissionExplanations {
 
     const val READ_MEDIA_AUDIO_TITLE = "Audio files (READ_MEDIA_AUDIO)"
     const val READ_MEDIA_AUDIO_TEXT =
-        "Lets the app list audio on this device. Stage 1 does not ask for it: the file picker " +
-            "gives the app access to the files you choose, so nothing else is read. Stage 2 will ask for it " +
-            "when you turn on the library."
+        "Lets the library list the audio files on this device, so you can browse, search and build playlists. " +
+            "It is asked for the first time you open the library, and only then. The file picker in the player " +
+            "does not need it. Say no and the library still shows folders you add yourself."
+
+    const val LIBRARY_TITLE = "Your music library"
 
     const val POST_NOTIFICATIONS_TITLE = "Notifications (POST_NOTIFICATIONS)"
     const val POST_NOTIFICATIONS_TEXT =

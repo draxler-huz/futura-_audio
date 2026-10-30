@@ -1,40 +1,22 @@
 package com.example.wakeupmusic
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.core.content.ContextCompat
 
+/**
+ * Fired by the alarm clock. It starts [AlarmService], which rings in the foreground. The alarm keeps going after the
+ * user leaves the alarm screen, because the service, not the activity, owns the sound.
+ *
+ * Android allows this foreground start because the broadcast comes from an exact alarm (setAlarmClock), which is
+ * one of the exemptions from background-start limits.
+ */
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val nm = context.getSystemService(NotificationManager::class.java)
-        // The alarm screen plays the audio, so the channel itself is silent
-        nm.createNotificationChannel(
-            NotificationChannel("alarm", "Wake-up alarm", NotificationManager.IMPORTANCE_HIGH).apply {
-                setSound(null, null)
-            }
+        ContextCompat.startForegroundService(
+            context,
+            Intent(context, AlarmService::class.java).setAction(AlarmService.ACTION_START),
         )
-
-        val fullScreen = PendingIntent.getActivity(
-            context, 2001,
-            Intent(context, AlarmActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        // The full-screen intent is the path that shows the alarm over the lock screen
-        val notification = Notification.Builder(context, "alarm")
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Wake-up music")
-            .setContentText("Your alarm is ringing")
-            .setCategory(Notification.CATEGORY_ALARM)
-            .setPriority(Notification.PRIORITY_MAX)
-            .setFullScreenIntent(fullScreen, true)
-            .setOngoing(true)
-            .build()
-
-        nm.notify(1, notification)
     }
 }

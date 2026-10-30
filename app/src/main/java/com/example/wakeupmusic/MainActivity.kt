@@ -224,7 +224,8 @@ class MainActivity : Activity() {
     private fun pickTrack() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "audio/*"
+            // "*/*", not "audio/*": with audio/* many providers grey out FLAC, Opus and M4A files.
+            type = "*/*"
         }
         startActivityForResult(intent, REQ_PICK_TRACK)
     }
