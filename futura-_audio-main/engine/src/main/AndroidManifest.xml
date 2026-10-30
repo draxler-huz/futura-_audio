@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The engine declares no components and no permissions. Its native library is loaded by :app. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
