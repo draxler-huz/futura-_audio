@@ -6,18 +6,17 @@
 include(FetchContent)
 
 # Header-only or single-file dependencies. Populated, not built, because they have no library target.
+# NOTE: GIT_SHALLOW TRUE is intentionally omitted for commit-hash pins — shallow clones cannot resolve
+# arbitrary commits, only branch/tag tips.
 FetchContent_Declare(futura_minimp3
     GIT_REPOSITORY https://github.com/lieff/minimp3.git
-    GIT_TAG ea99364f61c14656440e8d77e9c233ccf3124633          # CC0-1.0
-    GIT_SHALLOW TRUE)
+    GIT_TAG ea99364f61c14656440e8d77e9c233ccf3124633)         # CC0-1.0
 FetchContent_Declare(futura_drlibs
     GIT_REPOSITORY https://github.com/mackron/dr_libs.git
-    GIT_TAG e84e28a98d0503b762053415419919623e9d6c96          # Public domain or MIT-0 (choice)
-    GIT_SHALLOW TRUE)
+    GIT_TAG e84e28a98d0503b762053415419919623e9d6c96)         # Public domain or MIT-0 (choice)
 FetchContent_Declare(futura_stb
     GIT_REPOSITORY https://github.com/nothings/stb.git
-    GIT_TAG 003501f6d7a8668ce8b6d875e34dd97ad0d5d5b5          # stb_vorbis.c: public domain or MIT (choice)
-    GIT_SHALLOW TRUE)
+    GIT_TAG 003501f6d7a8668ce8b6d875e34dd97ad0d5d5b5)         # stb_vorbis.c: public domain or MIT (choice)
 foreach(dep futura_minimp3 futura_drlibs futura_stb)
     FetchContent_GetProperties(${dep})
     if(NOT ${dep}_POPULATED)
@@ -36,15 +35,13 @@ set(OPUS_DEEP_PLC OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(futura_opus
     GIT_REPOSITORY https://github.com/xiph/opus.git
     GIT_TAG v1.5.2                                            # BSD-3-Clause
-    GIT_SHALLOW TRUE)
+    GIT_SHALLOW TRUE)                                         # tag pin — shallow is safe here
 FetchContent_MakeAvailable(futura_opus)
 
-# Apple's open-source ALAC. Fetched on every platform so the host test can round-trip it. The decoder is only
-# linked into the library on Android (MP4 is only decoded there, see decoder_mediacodec.cpp).
+# Apple's open-source ALAC.
 FetchContent_Declare(futura_alac
     GIT_REPOSITORY https://github.com/macosforge/alac.git
-    GIT_TAG c38887c5c5e64a4b31108733bd79ca9b2496d987          # Apache-2.0
-    GIT_SHALLOW TRUE)
+    GIT_TAG c38887c5c5e64a4b31108733bd79ca9b2496d987)         # Apache-2.0
 FetchContent_GetProperties(futura_alac)
 if(NOT futura_alac_POPULATED)
     FetchContent_Populate(futura_alac)
