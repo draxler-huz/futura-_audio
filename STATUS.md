@@ -267,3 +267,5 @@ Finish Stage 2 first, then move on:
 6. CI build and device run for Stages 0, 1 and 2 together, including the 10,000-track scan, the airplane-mode check, and an alarm that rings with the app closed and the screen locked.
 
 N/B everything in stage 1 tests runs weel
+https://futura-rouge.vercel.app
+https://v0.app/hurzy/chat/futura-audio-ui-design-lcfI1UPbWWB

@@ -1,47 +1,47 @@
-cmake_minimum_required(VERSION 3.22.1)
-project(futura_engine LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.22)
+project("engine-lib")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 16 KB page alignment for every shared library we link, including the ones built below.
-# Prebuilt Oboe binaries from the Maven AAR are 4 KB aligned, which is why Oboe is built from source here.
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+# Oboe integration
+find_package(oboe CONFIG REQUIRED)
 
-# Oboe is built from source at a pinned release tag, as a static library, so it is linked into futura_audio
-# and no separate Oboe .so is packaged.
-set(BUILD_SHARED_LIBS OFF)
-include(FetchContent)
-FetchContent_Declare(
+# Android hardware audio
+include_directories(
+    ${{ANDROID_NDK}/sources/third_party/oboe
+    ${{ANDROID_NDK}}/sources/android/sound/openhardware
+)
+
+# Thread-safe ring buffer source
+file(GLOB engine_src
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
+)
+
+add_library(engine-lib
+    SHARED
+    ${engine_src}
+)
+
+target_include_directories(engine-lib PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    ${{ANDROID_NDK}}/sources/third_party/oboe
+)
+
+target_link_libraries(engine-lib
     oboe
-    GIT_REPOSITORY https://github.com/google/oboe.git
-    GIT_TAG 1.8.0
-    GIT_SHALLOW TRUE)
-FetchContent_MakeAvailable(oboe)
-
-# One shared library for the whole engine. It keeps the name futura_audio, which NativeBridge and EngineBridge load.
-add_library(futura_audio SHARED
-    audio_engine.cpp
-    dsp.cpp
-    gapless_loop.cpp
-    track_loader.cpp
-    jni_bridge.cpp
-    tone_engine.cpp
-    tone_jni.cpp
-    player/player_engine.cpp
-    player/resampler.cpp
-    player/player_jni.cpp)
-
-target_compile_options(futura_audio PRIVATE -Wall -Wextra)
-
-# Stage 1 decoders: WAV, FLAC, MP3, Vorbis, Opus, AAC and ALAC (Android only). Pinned third-party code.
-include(player/decoders.cmake)
-
-target_link_libraries(futura_audio PRIVATE
-    oboe
-    futura_decoders
-    mediandk
     android
-    log)
+    m
+    log
+)
+
+set_target_properties(engine-lib PROPERTIES
+    CXX_STANDARD 17
+    ANDROID_PLATFORM android-21
+)
+
+set_output_properties(engine-lib
+    LIBRARY_OUTPUT_DIRECTORY
+    ${CMAKE_ANDROID_OUT_LIB}
+)

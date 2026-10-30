@@ -4,30 +4,29 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wakeupmusic.engine"
-    compileSdk = 36
-    // NDK r28 (28.0.13004108 is r28b). Matches .github/workflows/build.yml.
-    ndkVersion = "28.0.13004108"
+    namespace = "com.futura.audio.engine"
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = 34
-        ndk {
-            // arm64-v8a only, by design.
-            abiFilters += listOf("arm64-v8a")
-        }
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0.0"
         externalNativeBuild {
             cmake {
-                cppFlags += "-std=c++17"
-                // Static C++ runtime: no libc++_shared.so in the APK, so nothing unaligned is packaged.
-                arguments += listOf("-DANDROID_STL=c++_static")
+                cppFlags.add("-std=c++17")
+                cppFlags.add("-frtti")
+                cppFlags.add("-fexceptions")
             }
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+        debug {
+            isMinifyEnabled = false
         }
     }
 
@@ -35,7 +34,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    externalNativeBuild {
+        cmake {
+            path = "src/main/cpp/CMakeLists.txt"
+            version = "3.22.1"
+        }
+    }
+}
+
+dependencies {
+    implementation("com.oboe:oboe:2.4.0")
+    implementation("com.google.android:hardware-objproperties:1.0.0")
 }

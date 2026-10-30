@@ -2,82 +2,62 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-
-    <!-- Stage 1 playback. Each one is explained on screen before use (player/ui/PermissionExplanations.kt).
-         READ_MEDIA_AUDIO is declared but not requested yet: the file picker needs no permission. Stage 2 asks for it. -->
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Exact alarm scheduling. Present since before Stage 0. Listed in ci/guards/allowed_permissions.txt. -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-
-    <!-- Added by a library (Media3). Network is not allowed until stage 8, so strip it. Delete this block at stage 8. -->
-    <uses-permission
-        android:name="android.permission.ACCESS_NETWORK_STATE"
-        tools:node="remove" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
-        android:allowBackup="false"
-        android:icon="@android:drawable/ic_lock_idle_alarm"
-        android:label="Wake-Up Music">
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FUTURAAudio"
+        tools:targetApi="34">
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.FUTURAAudio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Stage 2 alarm service. The alarm rings here, so it keeps going when the screen is closed. -->
+        <service
+            android:name=".ForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback|dataSync" />
+
         <service
             android:name=".AlarmService"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
-
-        <activity
-            android:name=".AlarmActivity"
-            android:exported="false"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:launchMode="singleTop"
-            android:excludeFromRecents="true" />
-
-        <!-- Stage 0 skeleton: Compose screen with the test tone and engine status. Reached from MainActivity. -->
-        <activity
-            android:name=".skeleton.SkeletonActivity"
-            android:exported="false" />
-
-        <!-- Stage 1 player. Foreground service of type mediaPlayback that hosts the media session. -->
-        <service
-            android:name=".player.service.PlaybackService"
-            android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
-            </intent-filter>
-        </service>
-
-        <activity
-            android:name=".player.ui.PlayerActivity"
-            android:exported="false" />
-
-        <!-- Stage 2 music library. Shares the playback service with the player. Asks for READ_MEDIA_AUDIO itself. -->
-        <activity
-            android:name=".library.ui.LibraryActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <receiver
             android:name=".AlarmReceiver"
-            android:exported="false" />
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.futura.audio.ALARM_FIRE" />
+            </intent-filter>
+        </receiver>
 
         <receiver
-            android:name=".PreflightReceiver"
-            android:exported="false" />
+            android:name=".BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
     </application>
+
 </manifest>

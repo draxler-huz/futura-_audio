@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FUTURA AUDIO</string>
+    <string name="notification_channel_audio">Audio Engine</string>
+    <string name="notification_channel_alarms">Alarms</string>
+</resources>

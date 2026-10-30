@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.FUTURAAudio" parent="android:Theme.Material3.DayNight">
+        <item name="android:statusBarColor">@color/purple_500</item>
+        <item name="android:navigationBarColor">@color/purple_500</item>
+    </style>
+</resources>

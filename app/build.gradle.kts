@@ -1,83 +1,88 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// Signing is configured only when CI provides a non-empty keystore.
-// Locally (or without secrets) the release APK is simply left unsigned.
-val keystorePath: String? = System.getenv("KEYSTORE_PATH")
-val keystoreFile: File? = keystorePath?.let { File(it) }?.takeIf { it.exists() && it.length() > 0L }
-
 android {
-    namespace = "com.example.wakeupmusic"
-    compileSdk = 36
+    namespace = "com.futura.audio"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.wakeupmusic"
-        minSdk = 34          // Android 14
-        targetSdk = 36       // Android 16
+        applicationId = "com.futura.audio"
+        minSdk = 21
+        targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
-    }
+        versionName = "1.0.0"
 
-    signingConfigs {
-        if (keystoreFile != null) {
-            create("release") {
-                storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
-            }
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            if (keystoreFile != null) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.pro"),
+                "proguard-rules.pro"
+            )
         }
-    }
-
-    // The embedded fallback sound must be stored uncompressed so it can be opened as a file descriptor.
-    androidResources {
-        noCompress += "wav"
-    }
-
-    buildFeatures {
-        compose = true
+        debug {
+            isMinifyEnabled = false
+        }
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    buildFeatures {
+        viewBinding = false
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.0}"
+        }
     }
 }
 
 dependencies {
-    // Native audio engine (C++ via :engine). Replaces the native code that used to live in :app.
+    val coreKtx = "1.12.0"
+    val lifecycle = "2.7.0"
+    val activity = "1.8.2"
+    val composeBom = "2023.08.00"
+
+    implementation("androidx.core:core-ktx:$coreKtx")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle")
+    implementation("androidx.activity:activity-compose:$activity")
+    implementation("androidx.compose:compose-bom:$composeBom")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.runtime:runtime-livedata")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
     implementation(project(":engine"))
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-
-    // Compose UI (Stage 0 skeleton screen).
-    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.activity:activity-compose:1.9.3")
-
-    // Stage 1 playback: media session and service. Do not add media3-exoplayer: the native engine plays.
-    implementation("androidx.media3:media3-session:1.6.1")
-
-    // Stage 2 library: the folder picker's DocumentFile walk (F06). Plain AndroidX, no network.
-    implementation("androidx.documentfile:documentfile:1.0.1")
-
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.robolectric:robolectric:4.11.1")
+
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeBom")
 }
